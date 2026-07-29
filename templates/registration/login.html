@@ -1,0 +1,22 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход — NOVA</title><link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body class="auth-page">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <main class="auth-card">
+    <a class="brand" href="/"><span class="brand-mark"><span></span></span><span>NOVA <small>ЛИЧНЫЙ ПЛАННЕР</small></span></a>
+    <div class="auth-copy"><p class="eyebrow">ДОБРО ПОЖАЛОВАТЬ</p><h1>Войдите в свой план</h1><p>Ваши задачи, привычки и заметки доступны только в вашем аккаунте.</p></div>
+    <form method="post" class="auth-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+      <label for="id_username">Имя пользователя</label>{{ form.username }}
+      <label for="id_password">Пароль</label>{{ form.password }}
+      <button class="primary-button" type="submit">Войти</button>
+    </form>
+    <p class="auth-switch">Нет аккаунта? <a href="{% url 'signup' %}">Зарегистрироваться</a></p>
+  </main>
+</body>
+</html>
