@@ -12,6 +12,16 @@ python manage.py runserver
 
 Откройте `http://127.0.0.1:8000/`.
 
+## Запуск на Render
+
+Start Command:
+
+```text
+gunicorn nova_project.wsgi:application
+```
+
+В проекте Django-пакет называется `nova_project`, поэтому `gunicorn config.wsgi:application` здесь не сработает: модуля `config` нет.
+
 ## Команды
 
 - `добавь задачу подготовить отчёт`
