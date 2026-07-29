@@ -11,7 +11,9 @@ async function api(url, method = 'GET', body) {
   return data;
 }
 function notify(text) { const message = $('#statusMessage'); message.textContent = text; message.hidden = false; }
-function today() { return new Date().toISOString().slice(0, 10); }
+const novaTimeZone = 'Asia/Tashkent';
+function novaParts() { return Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: novaTimeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value])); }
+function today() { const parts = novaParts(); return `${parts.year}-${parts.month}-${parts.day}`; }
 function isOverdue(task) { return !task.completed && task.due_date && task.due_date < today(); }
 function formatDeadline(task) {
   if (!task.due_date) return `${priorityNames[task.priority]} приоритет · без срока`;
@@ -78,7 +80,7 @@ function escapeHtml(text) { const div = document.createElement('div'); div.textC
 function renderTimer() { $('#timerDisplay').textContent = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`; }
 function setMinutes(value) { clearInterval(timerId); ticking = false; selectedMinutes = value; remaining = value * 60; $('#timerButton').textContent = 'Начать'; $('#focusTitle').textContent = value === 5 ? 'Короткий перерыв' : 'Глубокая работа'; document.querySelectorAll('.preset').forEach((button) => button.classList.toggle('active', +button.dataset.minutes === value)); renderTimer(); }
 function toggleTimer() { ticking = !ticking; $('#timerButton').textContent = ticking ? 'Пауза' : 'Продолжить'; if (!ticking) return clearInterval(timerId); timerId = setInterval(() => { if (remaining) { remaining--; renderTimer(); } else { clearInterval(timerId); ticking = false; $('#timerButton').textContent = 'Новая сессия'; notify('Сессия завершена.'); } }, 1000); }
-function greeting() { const hour = new Date().getHours(); $('#greeting').textContent = hour < 12 ? 'Доброе утро.' : hour < 18 ? 'Добрый день.' : 'Добрый вечер.'; $('#dateLabel').textContent = new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()); }
+function greeting() { const parts = novaParts(), hour = Number(parts.hour); $('#greeting').textContent = hour < 12 ? 'Доброе утро.' : hour < 18 ? 'Добрый день.' : 'Добрый вечер.'; $('#dateLabel').textContent = new Intl.DateTimeFormat('ru-RU', { timeZone: novaTimeZone, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()); }
 
 $('#openTask').onclick = () => $('#taskDialog').showModal(); $('#closeTask').onclick = () => $('#taskDialog').close(); $('#cancelTask').onclick = () => $('#taskDialog').close();
 $('#taskForm').onsubmit = async (event) => { event.preventDefault(); const title = $('#taskInput').value.trim(); if (!title) return; try { await api('/api/tasks/create/', 'POST', { title, priority: $('#priorityInput').value, due_date: $('#dueDate').value, due_time: $('#dueTime').value }); $('#taskForm').reset(); $('#taskDialog').close(); notify('Задача добавлена.'); await loadTasks(); } catch (error) { notify(error.message); } };
